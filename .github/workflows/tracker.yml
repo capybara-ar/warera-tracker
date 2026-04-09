@@ -1,6 +1,7 @@
 name: Warera Tracker
 
 on:
+  workflow_dispatch:   # 👈 ESTO HABILITA EL BOTÓN
   schedule:
     - cron: "0 */12 * * *"
 
