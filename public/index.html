@@ -1,1 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Warera Tracker</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
 
+<body style="background:#0f172a;color:white;font-family:sans-serif">
+
+<h1>📊 Warera Tracker</h1>
+
+<canvas id="damageChart"></canvas>
+<canvas id="wealthChart"></canvas>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBrAn1rX786lt9vXLK1mojBF1ARgFSCbNU",
+  authDomain: "warera-tracker.firebaseapp.com",
+  projectId: "warera-tracker",
+  storageBucket: "warera-tracker.firebasestorage.app",
+  messagingSenderId: "223076151947",
+  appId: "1:223076151947:web:785593efa1b3c663ee9a8e"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let damageChart;
+let wealthChart;
+
+async function loadData() {
+  const snapshot = await getDocs(collection(db, "stats"));
+
+  const users = {};
+
+  snapshot.forEach(doc => {
+    const entry = doc.data();
+    const user = entry.usuario;
+
+    if (!users[user]) {
+      users[user] = { fechas: [], damages: [], wealth: [] };
+    }
+
+    users[user].fechas.push(entry.fecha);
+    users[user].damages.push(entry.userDamages);
+    users[user].wealth.push(entry.userWealth);
+  });
+
+  const damageDatasets = [];
+  const wealthDatasets = [];
+  let labels = [];
+
+  for (const user in users) {
+    const u = users[user];
+    labels = u.fechas;
+
+    damageDatasets.push({ label: user, data: u.damages });
+    wealthDatasets.push({ label: user, data: u.wealth });
+  }
+
+  damageChart = new Chart(document.getElementById("damageChart"), {
+    type: "line",
+    data: { labels, datasets: damageDatasets }
+  });
+
+  wealthChart = new Chart(document.getElementById("wealthChart"), {
+    type: "line",
+    data: { labels, datasets: wealthDatasets }
+  });
+}
+
+loadData();
+</script>
+
+</body>
+</html>
